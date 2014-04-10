@@ -12,6 +12,10 @@
 *.la
 *.a
 
+# Eclipse project files
+*.cproject
+*.project
+
 src/wand/tests/test_design
 src/wand/tests/test_loglikratio_test
 src/wand/tests/test_pipeline
