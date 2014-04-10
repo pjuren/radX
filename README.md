@@ -1,9 +1,11 @@
 RADMeth: Regression Analysis of Differential Methylation
 ========================================================
 
-RADMeth: Regression Analysis of Differential Methilation is a software for 
-computing individual differentially methylated sites and genomic regions in 
-whole genome bisulfite sequencing (WGBS) data.
+RADX: Regression Analysis of Differential eXon inclusion is software for 
+identifying exons which show differential rates of inclusion within a
+gene between different sample types. It supports multiple replicates per 
+sample type, and arbitrary experimental design.  
+
 
 Contact Information
 -------------------
