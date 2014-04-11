@@ -1,4 +1,4 @@
-RADMeth: Regression Analysis of Differential Methylation
+RADX: Regression Analysis of Differential eXon Inclusion
 ========================================================
 
 RADX: Regression Analysis of Differential eXon inclusion is software for 
@@ -10,18 +10,18 @@ sample type, and arbitrary experimental design.
 Contact Information
 -------------------
 
-Egor Dolzhenko
-dolzhenk@usc.edu
+Philip J. Uren
+uren@usc.edu
 http://smithlabresearch.org/
 
 Installation
 ------------
-*Before attempting to compile RADMeth please make sure that GNU Scientific 
+*Before attempting to compile RADX please make sure that GNU Scientific 
 Library (http://www.gnu.org/software/gsl/) is installed on your system*
 Alternatively, you can download pre-compiled binaries for either Lunux or Mac 
-from http://smithlabresearch.org/software/radmeth/
+from http://smithlabresearch.org/software/
 
-To compile RADMeth, enter the program's root directory (e.g. radmeth/) and  
+To compile RADX, enter the program's root directory (e.g. radmeth/) and  
 execute
 
 > make
@@ -32,7 +32,7 @@ Usage
 -----
 
 Please see the manual, which can be obtained at 
-http://smithlabresearch.org/software/radmeth/
+http://smithlabresearch.org/software
 
 License
 -------
