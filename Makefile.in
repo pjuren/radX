@@ -36,7 +36,6 @@ test:
 
 clean:
 	@make -C src clean
-	@rm -rf *.bz2
 	@rm -rf ./bin
 	@rm -rf ./developmentDocs
 .PHONY: clean
@@ -47,7 +46,7 @@ developmentDocs:
 
 distclean: clean
 	@make -C src OPT=1 distclean
-	@rm -rf Makefile autom4te.cache config.log config.status 
+	@rm -rf Makefile autom4te.cache config.log config.status
 	@rm -rf $(distdir) $(distdir).tar.gz
 .PHONY: distclean
 
@@ -120,5 +119,3 @@ FORCE:
 	-rm -rf $(distdir) > /dev/null 2>&1
 .PHONY: FORCE
 
-#tarball: clean distclean
-#	DIR=$${PWD##*/}; echo $${DIR}; cd ..; tar --exclude=".*" -cvjf $${DIR}/$${DIR}.tar.bz2 $${DIR}

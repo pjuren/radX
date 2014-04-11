@@ -55,9 +55,9 @@ then
 fi
 
 AC_OUTPUT(Makefile)
-#AC_OUTPUT(src/Makefile)
+AC_OUTPUT(src/Makefile)
 #AC_OUTPUT(src/test/Makefile)
-#AC_OUTPUT(src/progs/Makefile)
-#AC_OUTPUT(src/common/Makefile)
-#AC_OUTPUT(src/common/config.hpp)
+AC_OUTPUT(src/progs/Makefile)
+AC_OUTPUT(src/common/Makefile)
+AC_OUTPUT(src/common/config.hpp)
 #AC_OUTPUT(src/test/regressionTests.xml)
