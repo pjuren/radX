@@ -21,20 +21,24 @@ ifndef SMITHLAB_CPP
 $(error Must define SMITHLAB_CPP variable)
 endif
 
-PROGS = Piranha Simulate
+PROGS = radx
 
 CXX = g++
 CFLAGS = -Wall -fPIC -fmessage-length=50
 OPTFLAGS = -O3
 DEBUGFLAGS = -g 
 COMMON_DIR = ../common/
-LIBS = -lgsl -lgslcblas @bamlibdir@ @bamlib@
+LIBS = -lgsl -lgslcblas 
 
-INCLUDEDIRS = $(SMITHLAB_CPP) $(COMMON_DIR) @bamhead@
+INCLUDEDIRS = $(SMITHLAB_CPP) $(COMMON_DIR) 
 INCLUDEARGS = $(addprefix -I,$(INCLUDEDIRS))
 
 ifeq "$(shell uname)" "Darwin"
 CFLAGS += -arch x86_64
+ifeq "$(shell if [ `sysctl -n kern.osrelease | cut -d . -f 1` -ge 13 ];\
+              then echo 'true'; fi)" "true"
+CFLAGS += -stdlib=libstdc++
+endif
 endif
 
 ifdef DEBUG
@@ -54,23 +58,13 @@ all:    $(PROGS)
 	$(CXX) $(CFLAGS) -c -o $@ $< $(INCLUDEARGS)	
 
 %: %.cpp
-	$(CXX) $(CFLAGS) @rpathflags@ -o $@ $^ $(INCLUDEARGS) $(LIBS)
+	$(CXX) $(CFLAGS) -o $@ $^ $(INCLUDEARGS) $(LIBS)
 
-Piranha: $(addprefix $(SMITHLAB_CPP)/, GenomicRegion.o smithlab_os.o \
-	smithlab_utils.o OptionParser.o MappedRead.o)
-Piranha : $(addprefix $(COMMON_DIR), \
-	Gaussian.o NegativeBinomial.o \
-	PoissonRegression.o Poisson.o SimpleXML.o \
-	NegativeBinomialRegression.o MixtureModel.o \
-	ZTNBRegression.o RegressionMixtureModel.o \
-	LinearRegression.o Distribution.o \
-	TruncatedPoissonRegression.o VectorMath.o Matrix.o \
-	RegressionModel.o ZTP.o Utility.o \
-	DistributionMixtureModel.o ZTNB.o GeneralisedLinearModel.o \
-	ReadBinner.o FDR.o)
-
-Simulate : $(addprefix $(SMITHLAB_CPP)/, GenomicRegion.o smithlab_os.o \
-	smithlab_utils.o OptionParser.o RNG.o)
+radx: $(addprefix $(SMITHLAB_CPP)/, GenomicRegion.o smithlab_os.o \
+	smithlab_utils.o OptionParser.o)
+radx :$(addprefix $(COMMON_DIR), \
+	design.o regression.o loglikratio_test.o table_row.o pipeline.o \
+  gsl_fitter.o)
 
 install: all
 	@mkdir -p ../../bin
