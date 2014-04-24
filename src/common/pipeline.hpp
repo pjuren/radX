@@ -20,8 +20,14 @@
 #ifndef PIPELINE_HPP_
 #define PIPELINE_HPP_
 
+// local RADIX includes
+#include "Gene.hpp"
+
+// stl includes
 #include <sstream>
 #include <string>
+#include <vector>
+#include <tr1/unordered_map>
 
 // The wand function executes the beta-binomial regresson pipeline. Parameters 
 // design_encoding and count_table_encoding are streams with the design matrix 
@@ -29,7 +35,11 @@
 // of the factor with respect to which the differential methylation should be 
 // tested. All of the output is sent to the out output stream.
 
-void wand(std::istream &design_encoding, std::istream &count_table_encoding, 
+void wand(std::istream &design_encoding,
+          std::vector<std::string> &exonReadCount_fns,
           std::string test_factor_name, std::ostream &out);
+void readExons(const std::vector<std::string> &filenames,
+          std::tr1::unordered_map< std::string, Gene > &genes,
+          const bool VERBOSE = false);
 
 #endif //PIPELINE_HPP_
