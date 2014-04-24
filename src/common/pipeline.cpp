@@ -1,8 +1,7 @@
-/*    Copyright (C) 2013 University of Southern California and
- *                       Egor Dolzhenko
- *                       Andrew D Smith
+/*    Copyright (C) 2014 University of Southern California and
+ *                       Philip J. Uren, Egor Dolzhenko, Andrew D Smith
  *
- *    Authors: Andrew D. Smith and Egor Dolzhenko
+ *    Authors: Philip J. Uren, Andrew D. Smith and Egor Dolzhenko
  *
  *    This program is free software: you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -14,8 +13,6 @@
  *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *    GNU General Public License for more details.
  */
- 
-// Contains the implementation of the wand function.
 
 // STD headers. 
 #include <iostream>
@@ -70,7 +67,7 @@ wand(istream &design_encoding, vector<string> &exonReadCount_fns,
   vector<string>::const_iterator test_factor_it = 
       std::find(factor_names.begin(), factor_names.end(), test_factor_name);
   
-  // Checking that the provided test factor names exitst.    
+  // Checking that the provided test factor names exist.
   if (test_factor_it == factor_names.end())
     throw SMITHLABException(test_factor_name + " is not a part of the design" 
                             " specification.");

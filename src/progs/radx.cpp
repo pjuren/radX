@@ -1,9 +1,7 @@
 /*    Copyright (C) 2014 University of Southern California and
- *                       Philip J Uren
- *                       Egor Dolzhenko
- *                       Andrew D Smith
+ *                       Philip J. Uren, Egor Dolzhenko, Andrew D Smith
  *
- *    Authors: Philip J Uren, Andrew D. Smith and Egor Dolzhenko
+ *    Authors: Philip J. Uren, Andrew D. Smith and Egor Dolzhenko
  *
  *    This program is free software: you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
