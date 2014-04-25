@@ -16,6 +16,18 @@
 *.cproject
 *.project
 
+# Files built by the configure script
+Makefile
+config.log
+src/common/Makefile
+src/common/config.hpp
+src/progs/Makefile
+config.status
+
+# Executables and directories made during 
+# building or testing 
+bin/
+src/progs/radx
 src/wand/tests/test_design
 src/wand/tests/test_loglikratio_test
 src/wand/tests/test_pipeline
