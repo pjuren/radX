@@ -75,10 +75,11 @@ Gene::addExonSampleCount(GenomicRegion r, string sName, size_t count) {
 
   // also, add the count for this exon to the total for this gene in the
   // given sample
-  unordered_map<string, size_t>::iterator it;
   if (this->geneReadcounts.find(sName) == this->geneReadcounts.end()) {
     this->geneReadcounts.insert(std::make_pair<string, int>(sName, 0));
   }
+  unordered_map<string, size_t>::iterator it = this->geneReadcounts.find(sName);
+  it->second += count;
 }
 
 
