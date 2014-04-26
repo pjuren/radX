@@ -18,12 +18,18 @@
 
 // stl imports
 #include <sstream>
+#include <vector>
+#include <string>
 
 // Radix includes
 #include "Gene.hpp"
 
-// use the following names
+// Bring the following into the global namespace
+using std::vector;
+using std::string;
 using std::stringstream;
+using std::tr1::unordered_map;
+
 
 /**
  * \brief adds a read count for the given sample name in the exon defined by
@@ -37,7 +43,7 @@ using std::stringstream;
  *        to it.
  */
 void
-Gene::addExonSampleCount(GenomicRegion r, std::string sName, size_t count) {
+Gene::addExonSampleCount(GenomicRegion r, string sName, size_t count) {
   // first check that it doesn't partially overlap any other exons
   for (size_t i = 0; i < this->exons.size(); ++i) {
     if (this->exons[i].partialOverlap(r)) {
@@ -66,6 +72,13 @@ Gene::addExonSampleCount(GenomicRegion r, std::string sName, size_t count) {
     e.addSampleReadCount(sName, count);
     this->addExon(e);
   }
+
+  // also, add the count for this exon to the total for this gene in the
+  // given sample
+  unordered_map<string, size_t>::iterator it;
+  if (this->geneReadcounts.find(sName) == this->geneReadcounts.end()) {
+    this->geneReadcounts.insert(std::make_pair<string, int>(sName, 0));
+  }
 }
 
 
@@ -93,6 +106,26 @@ Gene::addExon(Exon &e) {
     throw SMITHLABException(ss.str());
   }
   this->exons.push_back(e);
+}
+
+/**
+ * \brief populate the given vector<size_t> with the read counts in this gene
+ *        for the given sample names. The vector of resultant read counts will
+ *        have the same order as the names that are presented in sNames
+ * \param sNames   TODO
+ * \param res      TODO
+ */
+void
+Gene::getReadcounts(const vector<string> &sNames, vector<size_t> &res) const {
+  res.clear();
+  for (size_t i = 0; i < sNames.size(); ++i) {
+    if (this->geneReadcounts.find(sNames[i]) == this->geneReadcounts.end()) {
+      throw SMITHLABException("Lookup of read count for " + sNames[i] +\
+                              " for gene " + this->geneName + " failed. "
+                              "No read-count for that sample");
+    }
+    res.push_back(this->geneReadcounts.find(sNames[i])->second);
+  }
 }
 
 

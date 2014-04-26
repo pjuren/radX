@@ -37,7 +37,8 @@
 
 void wand(std::istream &design_encoding,
           std::vector<std::string> &exonReadCount_fns,
-          std::string test_factor_name, std::ostream &out);
+          std::string test_factor_name, std::ostream &out,
+          bool VERBOSE=false);
 void readExons(const std::vector<std::string> &filenames,
           std::tr1::unordered_map< std::string, Gene > &genes,
           const bool VERBOSE = false);

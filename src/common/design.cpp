@@ -33,6 +33,7 @@ Design::Design(istream &is) {
   
   string row;
   while (getline(is, row)) {
+    row = smithlab::strip(row);
 
     if (row.empty())
       continue;

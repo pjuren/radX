@@ -15,9 +15,11 @@
  */
 
 // STD headers. 
+#include <set>
 #include <iostream>
 #include <algorithm>
 #include <tr1/unordered_map>
+#include <sstream>
 
 // Smithlab headers.
 #include "smithlab_utils.hpp"
@@ -32,36 +34,29 @@
 #include "gsl_fitter.hpp"
 #include "regression.hpp"
 
+// bring the following into the default namespace
 using std::istream;
 using std::ostream;
 using std::string;
 using std::vector;
-using std::tr1::unordered_map;
-using std::istringstream;
+using std::cerr;
+using std::endl;
 using std::make_pair;
-
-vector<string> 
-split(string input) {
-  istringstream iss(input);
-  string token;
-  vector<string> tokens;
-  
-  while (iss >> token)
-    tokens.push_back(token);
-  
-  return tokens;
-}
+using std::stringstream;
+using std::istringstream;
+using std::tr1::unordered_map;
+using std::set;
 
 void
 wand(istream &design_encoding, vector<string> &exonReadCount_fns,
-     string test_factor_name, ostream &out) {
+     string test_factor_name, ostream &out, const bool VERBOSE) {
   // load the exon/gene counts
   unordered_map<string, Gene > genes;
-  readExons(exonReadCount_fns, genes);
+  readExons(exonReadCount_fns, genes, VERBOSE);
   
   // load the design matrix
-  /* Design full_design(design_encoding);
-  
+  // TODO eliminate the need for the user to provide the 'base' factor
+  Design full_design(design_encoding);
   vector<string> factor_names = full_design.factor_names();
   
   vector<string>::const_iterator test_factor_it = 
@@ -80,78 +75,53 @@ wand(istream &design_encoding, vector<string> &exonReadCount_fns,
   null_design.remove_factor(test_factor);
   Regression null_regression(null_design);
   
+  for (unordered_map<string,Gene>::iterator gene_it = genes.begin();
+       gene_it != genes.end(); gene_it++) {
+    vector<size_t> geneReadCounts;
+    gene_it->second.getReadcounts(exonReadCount_fns, geneReadCounts);
+    cerr << "gene: " << gene_it->second.getName() << endl;
+    for (Gene::const_iterator exon_it = gene_it->second.begin();
+         exon_it != gene_it->second.end(); ++exon_it) {
+      vector<size_t> exonReadcounts;
+      exon_it->getReadcounts(exonReadCount_fns, exonReadcounts);
 
-
-  for (unordered_map<string,vector<Exon> >::iterator g_it = genes.begin();
-       g_it != genes.end(); g_it++) {
-    for (vector<Exon>::iterator exon = g_it->second.begin();
-         exon != g_it->second.end(); ++exon) {
-      full_regression.set_response(gene.getReadCount(), exon.getReadCount());
+      full_regression.set_response(geneReadCounts, exonReadcounts);
       gsl_fitter(full_regression);
 
-      null_regression.set_response(row.total_counts, row.meth_counts);
+      null_regression.set_response(geneReadCounts, exonReadcounts);
       gsl_fitter(null_regression);
 
+      // TODO skip tests that will obviously result in p-value of 1
       double pval = loglikratio_test(null_regression.maximum_likelihood(),
                                      full_regression.maximum_likelihood());
-    }
-  }
 
-
-  // Read the first line of the count table which must contain names of the
-  // samples.
-  string sample_names_encoding;
-  getline(table_encoding, sample_names_encoding);
-  
-  if (  full_design.sample_names() != split(sample_names_encoding) )
-    throw SMITHLABException(sample_names_encoding + " does not match factor "
-                            "names (or their order) in the design matrix.");
-  
-  string row_encoding;
-  
-  // Perform the log-likelihood ratio on proportions from every row of the 
-  // proportion table.
-  while( getline(table_encoding, row_encoding) ) {
-    
-    TableRow row;
-    read_row(row_encoding, row);
-    
-    assert_compatibility(full_design, row);
-                                    
-    out << row.chrom << "\t" 
-        << row.begin << "\t"
-        << row.end   << "\t";
-    
-    if (has_low_coverage(full_design, test_factor, row)) {
-      // Don't test if there's no coverage in either case or control samples. 
-      out << "c:0:0\t" << -1;
-    } else if (has_extreme_counts(full_design, row)) {
-      // Don't test if the site is completely methylated or completely 
-      // unmethylated across all samples.
-      out << "c:0:0\t" << -1;
-    } else {
-      full_regression.set_response(row.total_counts, row.meth_counts);
-      gsl_fitter(full_regression);
-
-      null_regression.set_response(row.total_counts, row.meth_counts);
-      gsl_fitter(null_regression);
-
-      double pval = loglikratio_test(null_regression.maximum_likelihood(), 
-                                     full_regression.maximum_likelihood());
-      
-      // If error occured in the fitting algorithm (i.e. p-val is nan or -nan).
-      if (pval != pval) {
-        out << "c:0:0" << "\t" << "-1";
-      } else {
-        out << "c:" << full_regression.log_fold_change(test_factor)
-            << ":"  << full_regression.min_methdiff(test_factor)
-            << "\t" << pval;
+      // TODO add user-selected significance threshold
+      // TODO collect up all p-values and adjust for multiple hypothesis testing
+      if (pval < 0.01) {
+        GenomicRegion exonOut(exon_it->getGenomicRegion());
+        exonOut.set_score(full_regression.log_fold_change(test_factor));
+        out << exonOut << "\t" << pval << endl;
       }
     }
-    out << std::endl;
-  } */
+  }
 }
 
+/**
+ * \brief Get a string representation of the exon names that are in the
+ *        first std::set, but not in the second.
+ */
+string
+getExonDifferenceString(const set<string> &exons1, const set<string> &exons2) {
+  std::set<string> diff;
+  std::set_difference(exons1.begin(), exons1.end(), exons2.begin(),
+                      exons2.end(), std::inserter(diff, diff.end()));
+  string dStr = "";
+  for (std::set<string>::iterator it = diff.begin(); it != diff.end(); ++it) {
+    if (it != diff.begin()) dStr += ",";
+    dStr = dStr + (*it);
+  }
+  return dStr;
+}
 
 /**
  * \brief Load exon and gene read counts from a set of files. Each file
@@ -170,14 +140,22 @@ wand(istream &design_encoding, vector<string> &exonReadCount_fns,
  */
 void
 readExons(const vector<string> &filenames,
-          unordered_map< string, Gene > &genes,
-          const bool VERBOSE) {
+          unordered_map< string, Gene > &genes, const bool VERBOSE) {
+  const string nameDelim = "_exon_";
+  set<string> firstSampleExons;
   for (size_t i = 0; i < filenames.size(); ++i) {
+    if (VERBOSE) cerr << "LOADING SAMPLE " << filenames[i] << " ... ";
+    set<string> currentSampleExons;
     const string sampleName(filenames[i]);
     vector<GenomicRegion> sampleExons;
     ReadBEDFile(filenames[i], sampleExons);
-    for (size_t j = 0; j < sampleExons.size(); ++i) {
-      const string geneName(sampleExons[j].get_name());
+    if (VERBOSE) cerr << "DONE. LOADED " << sampleExons.size() << " "
+                      << "EXONS" << endl;
+    for (size_t j = 0; j < sampleExons.size(); ++j) {
+      const string fullExonName(sampleExons[j].get_name());
+      string geneName(getGeneName(fullExonName));
+
+      // if we haven't seen this gene before, we make a new gene object for it
       unordered_map< string, Gene >::iterator loc = genes.find(geneName);
       if (loc == genes.end()) {
         Exon e(sampleExons[j]);
@@ -186,12 +164,31 @@ readExons(const vector<string> &filenames,
       }
       loc->second.addExonSampleCount(sampleExons[j], sampleName,
                                      sampleExons[j].get_score());
+
+      // we remember a kind of manual hash of all the exons we see
+      stringstream ss;
+      ss << sampleExons[j].get_chrom() << sampleExons[j].get_start()
+         << sampleExons[j].get_end() << sampleExons[j].get_name()
+         << sampleExons[j].get_strand();
+      currentSampleExons.insert(ss.str());
     }
 
-    // finished loading all of the exons for this sample; make sure we got
-    // the same set as the first sample we loaded
-    if (i != 0) {
-      ;
+    // finished loading all of the exons for this sample. If this is the first
+    // sample, just remember what the exon keys were. Otherwise, we're going
+    // check that the keys from this sample matched the ones we already saw in
+    // the first sample.
+    if (i == 0) std::swap(firstSampleExons, currentSampleExons);
+    else {
+      string m = getExonDifferenceString(firstSampleExons, currentSampleExons);
+      string a = getExonDifferenceString(currentSampleExons, firstSampleExons);
+      if (!m.empty())
+        throw SMITHLABException("The following exons were present in " +\
+                                filenames[0] + "but absent in " +\
+                                filenames[i] + ": " + m);
+      if (!a.empty())
+        throw SMITHLABException("The following exons were present in " +\
+                                filenames[i] + "but absent in " +\
+                                filenames[0] + ": " + a);
     }
   }
 }

@@ -77,16 +77,12 @@ try {
   std::ifstream design_file(design_filename.c_str());
   if (!design_file)
     throw SMITHLABException("could not open file: " + design_filename);
-    
-  //std::ifstream table_file(table_filename.c_str());
-  //if (!table_file)
-  //  throw SMITHLABException("could not open file: " + table_filename);
   
   std::ofstream of;
   if (!outfile.empty()) of.open(outfile.c_str());
   std::ostream out(outfile.empty() ? std::cout.rdbuf() : of.rdbuf());
   
-  wand(design_file, input_fns, test_factor_name, out);
+  wand(design_file, input_fns, test_factor_name, out, VERBOSE);
 }
 catch (const SMITHLABException &e) {
   cerr << e.what() << endl;

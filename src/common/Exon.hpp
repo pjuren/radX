@@ -19,7 +19,6 @@
 #ifndef EXON_HPP_
 #define EXON_HPP_
 
-
 // smithlab common code includes
 #include "GenomicRegion.hpp"
 
@@ -28,29 +27,30 @@
 #include <string>
 #include <tr1/unordered_map>
 
+size_t countOccurrences(const std::string &needle, const std::string &haystack,
+                        const bool overlapping=false);
+std::pair<std::string, std::string> splitFullExonName(const std::string &name);
 std::string getGeneName(const std::string &exonName);
 
 class Exon {
 public:
   Exon(const GenomicRegion& r) : region(r) {};
-  bool partialOverlap(const GenomicRegion &r);
-  bool sameRegion(const GenomicRegion &r);
+  bool partialOverlap(const GenomicRegion &r) const;
+  bool sameRegion(const GenomicRegion &r) const;
   void addSampleReadCount(const std::string &sampleName, const size_t count);
-  GenomicRegion getGenomicRegion();
-  std::string getExonName();
-  std::string getChrom();
-  char getStrand();
+  void getReadcounts(const std::vector<std::string> &sampleNames,
+                     std::vector<size_t> &res) const;
+  GenomicRegion getGenomicRegion() const;
+  std::string getExonName() const;
+  std::string getChrom() const;
+  char getStrand() const;
 
 private :
   GenomicRegion region;
-  std::tr1::unordered_map<std::string, double> sampleCounts;
+  std::tr1::unordered_map<std::string, size_t> sampleCounts;
 
   Exon() {};
   void addSample(std::string sampleName, size_t count);
-
-
-  //bool operator== (const Design &other_design) const;
-  //bool operator!= (const Design &other_design) const;
 };
 
 #endif // EXON_HPP_

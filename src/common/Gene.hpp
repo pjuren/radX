@@ -36,12 +36,19 @@ public:
                  strand(e.getStrand()) {};
   void addExon(Exon &e);
   void addExonSampleCount(GenomicRegion r, std::string sName, size_t count);
+  void getReadcounts(const std::vector<std::string> &sampleNames,
+                     std::vector<size_t> &res) const;
+  std::string getName() const { return this->geneName; };
+  typedef std::vector<Exon>::const_iterator  const_iterator;
+  const_iterator begin() const { return exons.begin(); };
+  const_iterator end() const { return exons.end(); };
 
 private :
   std::string geneName;
   std::string chrom;
   char strand;
   std::vector<Exon> exons;
+  std::tr1::unordered_map<std::string, size_t> geneReadcounts;
 };
 
 #endif // GENE_HPP_
