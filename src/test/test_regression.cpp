@@ -18,6 +18,7 @@
 // GSL headers.
 #include <sstream>
 #include <vector>
+#include <cmath>
 
 // GSL headers.
 #include <gsl/gsl_matrix_double.h>
