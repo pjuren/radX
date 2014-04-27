@@ -1,0 +1,44 @@
+<!--
+Copyright (C) 2014 Philip J. Uren
+
+Authors: Philip J. Uren
+
+This program is free software: you can redistribute it and/or 
+modify it under the terms of the GNU General Public License 
+as published by the Free Software Foundation, either version 
+3 of the License, or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful, 
+but WITHOUT ANY WARRANTY; without even the implied warranty 
+of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See 
+the GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public 
+License along with this program. 
+If not, see http://www.gnu.org/licenses/.
+
+
+PJU:  This file defines the regression tests to run. It's written in XML.
+			Commands can be split over multiple lines, to improve readability,
+			without a line continuation character and they will still work.
+--> 
+
+<regressionTests>
+  <test>
+    <!--
+      Tests the basic functionality of RADIX, nothing fancy here.
+    -->
+    <name> RADIX regression test 1 </name> 
+    <command> 
+      ../../bin/radx -v -d regressionTestInputs/regTest1_design.mat -f KD 
+        regressionTestInputs/regTest1_C1.bed 
+				regressionTestInputs/regTest1_C2.bed 
+        regressionTestInputs/regTest1_M1.bed 
+				regressionTestInputs/regTest1_M2.bed 
+    </command>
+    <expected> 
+      regressionTestOutputs/regTest1_out.bed
+    </expected> 
+  </test>
+</regressionTests>
+
