@@ -19,25 +19,41 @@
 #include <vector>
 #include <string>
 
-#include "gmock/gmock.h"
+// Google Test headers.
+#include "gtest/gtest.h"
 
 #include "table_row.hpp"
 
 using std::istringstream; using std::vector;
 using std::string; using std::istream;
 
-using ::testing::Eq; using ::testing::Pointwise;
-using ::testing::Le; using ::testing::Ge;
-using ::testing::ElementsAre; using ::testing::Test;
+//using ::testing::Eq; using ::testing::Pointwise;
+//using ::testing::Le; using ::testing::Ge;
+//using ::testing::ElementsAre; 
+using ::testing::Test;
+
+// TODO template
+static bool 
+elementsAreSize_t(const vector<size_t> &arg, const vector<size_t> &val) {
+  if (arg.size() != val.size()) return false;
+  for (size_t i = 0; i < arg.size(); ++i) {
+    if (arg[i] != val[i]) return false;
+  }
+  return true;
+}
 
 TEST(ReadRow, InitializesTableRowFromString) {
   TableRow row;
   read_row("chr1:10:11 10 5 10 5 10 7 10 7", row);
-  ASSERT_THAT(row.chrom, Eq("chr1"));
-  ASSERT_THAT(row.begin, Eq(10));
-  ASSERT_THAT(row.end, Eq(11));
-  ASSERT_THAT(row.total_counts, ElementsAre(10, 10, 10, 10));
-  ASSERT_THAT(row.meth_counts, ElementsAre(5, 5, 7, 7));
+  ASSERT_EQ(row.chrom, "chr1");
+  ASSERT_EQ(row.begin, size_t(10));
+  ASSERT_EQ(row.end, size_t(11));
+	size_t t[4] = {10,10,10,10};
+	size_t u[4] = {5,5,7,7};
+	vector<size_t> tv (t, t + sizeof(t) / sizeof(t[0]));
+	vector<size_t> tu (u, u + sizeof(t) / sizeof(u[0]));
+  ASSERT_EQ(elementsAreSize_t(row.total_counts, tv), true); 
+  ASSERT_EQ(elementsAreSize_t(row.meth_counts, tu), true);  
 }
 
 TEST(ReadRow, ThrowsErrorIfChromosomeIsMissing) {

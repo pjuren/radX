@@ -18,20 +18,42 @@
 #include <sstream>
 #include <string>
 
-#include "gmock/gmock.h"
+// Google Test headers.
+#include "gtest/gtest.h"
 
 #include "design.hpp"
 
-using ::testing::Eq; using ::testing::ElementsAre;
-using ::testing::Ne;
+//using ::testing::Eq; using ::testing::ElementsAre;
+//using ::testing::Ne;
 
-using std::string;  using std::istringstream;
+using std::string; 
+using std::vector;
+using std::istringstream;
 using std::ostringstream;
+
+static bool 
+elementsAreString(const vector<string> &arg, const vector<string> &val) {
+	if (arg.size() != val.size()) return false;
+	for (size_t i = 0; i < arg.size(); ++i) {
+    if (arg[i] != val[i]) return false;
+	}
+	return true;
+}
+
+// TODO template 
+static bool
+elementsAreDouble(const vector<double> &arg, const vector<double> &val) {
+  if (arg.size() != val.size()) return false; 
+  for (size_t i = 0; i < arg.size(); ++i) {
+	  if (arg[i] != val[i]) return false;
+	} 
+  return true;
+}
 
 TEST(a_design, sets_number_of_samples_and_factors_to_zero_by_default) {
   Design design;
-  ASSERT_THAT(design.num_factors(), Eq(0));
-  ASSERT_THAT(design.num_samples(), Eq(0));
+  ASSERT_EQ(design.num_factors(), size_t(0));
+  ASSERT_EQ(design.num_samples(), size_t(0));
 }
 
 TEST(a_design, parses_factor_names_during_initialization) {
@@ -41,8 +63,11 @@ TEST(a_design, parses_factor_names_during_initialization) {
   
   Design design(iss);
   
-  ASSERT_THAT(design.factor_names(), ElementsAre("f1", "f2"));
-  ASSERT_THAT(design.num_factors(), Eq(2));
+	vector<string> e;
+	e.push_back("f1");
+	e.push_back("f2");
+  ASSERT_EQ(elementsAreString(design.factor_names(), e), true); 
+  ASSERT_EQ(design.num_factors(), size_t(2));
 }
 
 TEST(a_design, parses_sample_names_during_initialization) {
@@ -51,7 +76,10 @@ TEST(a_design, parses_sample_names_during_initialization) {
                     "s2 1 0"  );
   
   Design design(iss);
-  ASSERT_THAT(design.sample_names(), ElementsAre("s1", "s2"));
+	vector<string> e;
+	e.push_back("s1");
+	e.push_back("s2");
+  ASSERT_EQ(elementsAreString(design.sample_names(), e), true);  
 }
 
 TEST(a_design, parses_matrix_from_file) {
@@ -60,9 +88,14 @@ TEST(a_design, parses_matrix_from_file) {
                     "s2 1  0" );
   
   Design design(iss);
-  ASSERT_THAT(design.matrix().size(), Eq(2));
-  ASSERT_THAT(design.matrix()[0], ElementsAre(1, 1));
-  ASSERT_THAT(design.matrix()[1], ElementsAre(1, 0));
+  ASSERT_EQ(design.matrix().size(), size_t(2));
+	vector<double> e1, e2;
+	e1.push_back(1.0);
+	e1.push_back(1.0);
+	e2.push_back(1.0);
+	e2.push_back(0.0);
+  ASSERT_EQ(elementsAreDouble(design.matrix()[0], e1), true);
+  ASSERT_EQ(elementsAreDouble(design.matrix()[1], e2), true); 
 }
 
 TEST(a_design, parses_matrix_from_file_disregarding_extra_lines) {
@@ -72,9 +105,14 @@ TEST(a_design, parses_matrix_from_file_disregarding_extra_lines) {
                     "\n" );
   
   Design design(iss);
-  ASSERT_THAT(design.matrix().size(), Eq(2));
-  ASSERT_THAT(design.matrix()[0], ElementsAre(1, 1));
-  ASSERT_THAT(design.matrix()[1], ElementsAre(1, 0));
+  ASSERT_EQ(design.matrix().size(), size_t(2));
+	vector<double> e1, e2;
+	e1.push_back(1.0);
+  e1.push_back(1.0);
+  e2.push_back(1.0);
+  e2.push_back(0.0);
+  ASSERT_EQ(elementsAreDouble(design.matrix()[0], e1), true);
+  ASSERT_EQ(elementsAreDouble(design.matrix()[1], e2), true);
 }
 
 TEST(a_design, verifies_that_factor_levels_are_binary) {
@@ -99,8 +137,8 @@ TEST(a_design, can_access_elements_through_function_call_operator) {
                     "s2 1  0");
                     
   Design design(iss);
-  ASSERT_THAT(design(0, 0), Eq(1.0));
-  ASSERT_THAT(design(1, 1), Eq(0.0));
+  ASSERT_EQ(design(0, 0), 1.0);
+  ASSERT_EQ(design(1, 1), 0.0);
 }
 
 TEST(a_design, outputs_its_string_representation) {
@@ -110,7 +148,7 @@ TEST(a_design, outputs_its_string_representation) {
   Design design(iss);
   ostringstream oss;
   oss << design;
-  ASSERT_THAT(oss.str(), Eq(encoding + '\n'));
+  ASSERT_EQ(oss.str(), encoding + '\n');
 }
 
 TEST(a_design, removes_factor) {
@@ -122,7 +160,7 @@ TEST(a_design, removes_factor) {
   design.remove_factor(0);
   ostringstream oss;
   oss << design;
-  ASSERT_THAT(oss.str(), Eq("f2\ns1\t1\ns2\t0\n"));
+  ASSERT_EQ(oss.str(), "f2\ns1\t1\ns2\t0\n");
 }
 
 TEST(a_design, removes_factor_by_factor_name) {
@@ -134,7 +172,7 @@ TEST(a_design, removes_factor_by_factor_name) {
   design.remove_factor_name("f1");
   ostringstream oss;
   oss << design;
-  ASSERT_THAT(oss.str(), Eq("f2\ns1\t1\ns2\t0\n"));
+  ASSERT_EQ(oss.str(), "f2\ns1\t1\ns2\t0\n");
 }
 
 TEST(a_design, throws_exception_when_removing_nonexistent_factor_name) {
@@ -156,7 +194,7 @@ TEST(a_design, equals_to_another_design_initialized_from_equal_string) {
                       "s2 1 0" );
   Design design_b(iss_b);
   
-  ASSERT_THAT(design_a, Eq(design_b));
+  ASSERT_EQ(design_a, design_b);
 }
 
 TEST(a_design, after_dropping_factor_design_is_not_equal_to_original) {
@@ -170,5 +208,5 @@ TEST(a_design, after_dropping_factor_design_is_not_equal_to_original) {
   Design reduced_design = design;
   reduced_design.remove_factor_name("f2");
   
-  ASSERT_THAT(reduced_design, Ne(design));
+  ASSERT_EQ(reduced_design == design, false);
 }

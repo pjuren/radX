@@ -22,8 +22,8 @@
 // GSL headers.
 #include <gsl/gsl_cdf.h>
 
-// Google Mock headers.
-#include "gmock/gmock.h"
+// Google Test headers.
+#include "gtest/gtest.h"
 
 // Local headers.
 #include "design.hpp"
@@ -31,9 +31,8 @@
 #include "gsl_fitter.hpp"
 #include "loglikratio_test.hpp"
 
-using std::istringstream; using std::vector;
-
-using testing::Eq; using testing::DoubleNear;
+using std::istringstream; 
+using std::vector;
 
 const double max_abs_error = 0.001;
 
@@ -44,7 +43,8 @@ TEST(a_loglikratio_test, gives_low_pvalue) {
             "s4\t1\t1\ns5\t1\t1\ns6\t1\t1\ns7\t1\t1");
 
   vector<size_t> response_total(8, 15);
-  vector<size_t> response_meth = { 8, 5, 2, 2, 13, 14, 8, 5};
+	static const size_t t[8] = { 8, 5, 2, 2, 13, 14, 8, 5};
+  vector<size_t> response_meth(t, t + sizeof(t) / sizeof(t[0]));
   
   const size_t test_factor = 1;
 
@@ -64,7 +64,7 @@ TEST(a_loglikratio_test, gives_low_pvalue) {
   double pval = loglikratio_test(null_regression.maximum_likelihood(), 
                                 regression.maximum_likelihood());
   
-  ASSERT_THAT(pval, DoubleNear(0.0302161 , max_abs_error));
+  EXPECT_NEAR(pval, 0.0302161 , max_abs_error);
 }
 
 TEST(a_loglik_ratio_test, gives_high_pvalue) {
@@ -73,7 +73,8 @@ TEST(a_loglik_ratio_test, gives_high_pvalue) {
             "s4\t1\t1\ns5\t1\t1\ns6\t1\t1\ns7\t1\t1");
   
   vector<size_t> response_total(8, 15);
-  vector<size_t> response_meth = { 7, 11,  1,  6,  5,  4,  2,  4};
+	static const size_t t[8] = { 7, 11,  1,  6,  5,  4,  2,  4};
+  vector<size_t> response_meth(t, t + sizeof(t) / sizeof(t[0]));
   
   const size_t test_factor = 1;
   
@@ -92,6 +93,6 @@ TEST(a_loglik_ratio_test, gives_high_pvalue) {
 
   double pval = loglikratio_test(null_regression.maximum_likelihood(), 
                                 regression.maximum_likelihood());
-                                  
-  ASSERT_THAT(pval, DoubleNear(0.276009 , max_abs_error));
+  
+	EXPECT_NEAR(pval, 0.276009, max_abs_error);
 }
