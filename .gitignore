@@ -17,21 +17,20 @@
 *.project
 
 # Files built by the configure script
-Makefile
-config.log
-src/common/Makefile
-src/common/config.hpp
-src/progs/Makefile
-config.status
+/Makefile
+/src/Makefile
+/config.log
+/src/common/Makefile
+/src/common/config.hpp
+/src/progs/Makefile
+/config.status
 
 # Executables and directories made during 
 # building or testing 
-bin/
-src/progs/radx
-src/wand/tests/test_design
-src/wand/tests/test_loglikratio_test
-src/wand/tests/test_pipeline
-src/wand/tests/test_regression
-src/wand/tests/test_table_row
-src/adjust/stoufferliptak
-src/adjust/tests/test_adjust.sublime-workspace
+/bin/
+/src/progs/radx
+/src/test/test_design
+/src/test/test_loglikratio_test
+/src/test/test_pipeline
+/src/test/test_regression
+/src/test/test_table_row
