@@ -4,4 +4,4 @@ language: cpp
 compiler:
   - gcc
   - clang
-script: ./configure && make
+script: ./configure && make && make test
