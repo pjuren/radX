@@ -7,6 +7,9 @@ It's core model is built around a beta-binomial regression, allowing
 it to support multiple replicates per sample type, and arbitrary 
 experimental design. 
 
+### Status
+[![Build Status](https://travis-ci.org/pjuren/radX.svg?branch=master)](https://travis-ci.org/pjuren/radX)
+
 Copyright and License Information
 ---------------------------------
 Copyright (C) 2014
