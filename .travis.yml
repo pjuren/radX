@@ -1,3 +1,5 @@
+before_install:
+  - sudo apt-get install -qq libgsl0-dev
 language: cpp
 compiler:
   - gcc
