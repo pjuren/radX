@@ -7,7 +7,7 @@ It's core model is built around a beta-binomial regression, allowing
 it to support multiple replicates per sample type, and arbitrary 
 experimental design. 
 
-### Status
+### Current Build Status
 [![Build Status](https://travis-ci.org/pjuren/radX.svg?branch=master)](https://travis-ci.org/pjuren/radX)
 
 Copyright and License Information
@@ -62,23 +62,23 @@ incompatibility when building or using it, please let us know!
   
 ### Step 1 -- configuring ###
 
-  First configure the installation. To do this, where '>' is your prompt and 
-  the CWD is the root of the distribution, type:
+  First configure the installation. To do this, change into the root
+	directory of the distribution and type: 
       
   > ./configure 
 
 ### Step 2 -- building ###
   
-  To build the binaries, type the following, where '>' is your prompt and the
-  CWD is the root of the distribution  
+  To build the binaries, again in the root directory of the distributon,
+	type: 
         
   > make all 
             
 ### Step 3 -- installing ###
   
-  To install the binaries, type the following, where '>' is your prompt and the
-  CWD is the root of the distribution
-                  
+  To install the binaries, again in the root directory of the distribution
+  type:
+
   > make install
                       
   This will place the binaries in the bin directory under the package root.
@@ -90,8 +90,8 @@ incompatibility when building or using it, please let us know!
 ### Step 4 -- testing [OPTIONAL] ###
   
   You can verify that RADIX was built correctly by running the included
-  regression tests. At the command prompt (assuming your prompt is '>') 
-  type the following:
+  unit tests and regression tests. In the root directory of the distribution
+	type:
                                           
   > make test 
 
@@ -198,11 +198,11 @@ andrewds@usc.edu
 If you found a bug in RADIX, we'd like to know about it. Before contacting us
 though, please check the following list:
 
-1.) Are you using the latest version? The bug you found may already have 
-    been fixed.
-2.) Check that your input is in the correct format and you have selected
-    the correct options.
-3.) Please reduce your input to the smallest possible size that still 
-    produces the bug; we will need your input data to reproduce the 
-    problem.
+1. Are you using the latest version? The bug you found may already have 
+   been fixed.
+2. Check that your input is in the correct format and you have selected
+   the correct options.
+3. Please reduce your input to the smallest possible size that still 
+   produces the bug; we will need your input data to reproduce the 
+   problem.
 
