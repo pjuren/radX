@@ -42,5 +42,8 @@ void wand(std::istream &design_encoding,
 void readExons(const std::vector<std::string> &filenames,
           std::tr1::unordered_map< std::string, Gene > &genes,
           const bool VERBOSE = false);
+void readExons(const std::string filename,
+               std::tr1::unordered_map< std::string, Gene > &genes,
+               const bool VERBOSE);
 
 #endif //PIPELINE_HPP_

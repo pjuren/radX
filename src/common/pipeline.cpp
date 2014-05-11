@@ -36,6 +36,7 @@
 
 // bring the following into the default namespace
 using std::istream;
+using std::ifstream;
 using std::ostream;
 using std::string;
 using std::vector;
@@ -52,7 +53,11 @@ wand(istream &design_encoding, vector<string> &exonReadCount_fns,
      string test_factor_name, ostream &out, const bool VERBOSE) {
   // load the exon/gene counts
   unordered_map<string, Gene > genes;
-  readExons(exonReadCount_fns, genes, VERBOSE);
+  if (exonReadCount_fns.size() == 1)
+    readExons(exonReadCount_fns[0], genes, VERBOSE);
+  else
+    readExons(exonReadCount_fns, genes, VERBOSE);
+
   
   // load the design matrix
   // TODO eliminate the need for the user to provide the 'base' factor
@@ -193,4 +198,67 @@ readExons(const vector<string> &filenames,
   }
 }
 
+/**
+ * \brief Load exon and gene read counts from a single read-count matrix file.
+ *        The file is tab separated. The first row is a header and lists the
+ *        sample names for each sample included in the file. Each subsequent
+ *        row represents an exon. The first five columns in an exon row are:
+ *        chromosome, start index, end index, exon name, and exon exon strand.
+ *        The exon name must follow the format: exonName_exon_geneName,
+ *        where exonName and geneName can be any strings as long as they
+ *        (1) don't contain the tab character and (2) uniquely identify the
+ *        exon in the file. Exons in a gene must not overlap each other. Each
+ *        subsequent column i after the first five gives the read count for the
+ *        exon in the ith sample (matching the order in the header row).
+ * \param filenames filename to load the matrix from.
+ * \param genes     results (Gene objects) will be placed into this map, where
+ *                  the keys (string) are gene names.
+ * \param VERBOSE   print extra status messages if this is true. Defaults to
+ *                  false if not set.
+ */
+void
+readExons(const string filename, unordered_map< string, Gene > &genes,
+          const bool VERBOSE) {
+  vector<string> sampleNames;
+  bool first = true;
+  ifstream file(filename.c_str());
+  if (!file.good()) throw SMITHLABException("Unable to open file :" + filename);
+  string line;
+  while (!file.eof()) {
+    getline(file, line);
+    line = smithlab::strip(line);
+    if (line.empty()) continue;
+    vector<string> parts(smithlab::split(line,"\t"));
+    if (first) {
+      first = false;
+      std::swap(parts, sampleNames);
+    } else {
+      assert(parts.size() == sampleNames.size() + 5);
+      const string joined (parts[0] + "\t" + parts[1] + "\t" +\
+                           parts[2] + "\t" + parts[3] + "\t" + parts[4]);
+      cerr << joined << endl;
+      GenomicRegion r(joined);
+      const string fullExonName(r.get_name());
+      const string geneName(getGeneName(fullExonName));
 
+      // if we haven't seen this gene before, we make a new gene object for it
+      unordered_map< string, Gene >::iterator loc = genes.find(geneName);
+      if (loc == genes.end()) {
+        Exon e(r);
+        genes.insert (make_pair<string, Gene>(geneName, Gene(e)));
+        loc = genes.find(geneName);
+      }
+      for (size_t i = 0; i < sampleNames.size(); ++i) {
+        int sampleCount(atoi(parts[i+5].c_str()));
+        if (sampleCount < 0) {
+          stringstream ss;
+          ss << "line: " << line << " contains an invalid sample count: "
+             << sampleCount;
+          throw SMITHLABException(ss.str());
+        }
+        loc->second.addExonSampleCount(r, sampleNames[i],
+                                       static_cast<size_t>(sampleCount));
+      }
+    }
+  }
+}
