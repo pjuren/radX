@@ -132,16 +132,6 @@ run(istream &design_encoding, vector<string> &exonReadCount_fns,
       vector<size_t> exonReadCounts;
       exon_it->getReadcounts(sampleNames, exonReadCounts);
 
-      cerr << "sampleNames: ";
-      for (size_t g = 0; g < sampleNames.size(); ++g) cerr << sampleNames[g] << ",";
-      cerr << endl;
-      cerr << "gene read-counts: ";
-      for (size_t g = 0; g < geneReadCounts.size(); ++g) cerr << geneReadCounts[g] << ",";
-      cerr << endl;
-      cerr << "exon read-counts: ";
-      for (size_t g = 0; g < exonReadCounts.size(); ++g) cerr << exonReadCounts[g] << ",";
-      cerr << endl;
-
       full_regression.set_response(geneReadCounts, exonReadCounts);
       gsl_fitter(full_regression);
 
