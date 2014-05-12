@@ -41,6 +41,7 @@ void run(std::istream &design_encoding,
           bool VERBOSE=false);
 void readExons(const std::vector<std::string> &filenames,
           std::tr1::unordered_map< std::string, Gene > &genes,
+          std::vector<std::string> &sampleNames,
           const bool VERBOSE = false);
 void readExons(const std::string filename,
                std::tr1::unordered_map< std::string, Gene > &genes,

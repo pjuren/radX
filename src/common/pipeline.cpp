@@ -23,6 +23,7 @@
 
 // Smithlab headers.
 #include "smithlab_utils.hpp"
+#include "smithlab_os.hpp"
 
 // Local headers.
 #include "Gene.hpp"
@@ -49,6 +50,32 @@ using std::tr1::unordered_map;
 using std::set;
 
 /**
+ * \brief TODO
+ */
+void
+checkDesign (const Design &d, const vector<string> &sampleNames) {
+  vector<string> designSampleNames(d.sample_names());
+
+  // For output later.
+  string designSamples_str = "", sampleNames_str = "";
+  for (size_t i = 0; i < designSampleNames.size(); ++i) {
+    if (i != 0) designSamples_str += ", ";
+      designSamples_str += designSampleNames[i];
+  }
+  for (size_t i = 0; i < sampleNames.size(); ++i) {
+    if (i != 0) sampleNames_str += ", ";
+      sampleNames_str += sampleNames[i];
+  }
+
+  if (designSampleNames != sampleNames) {
+    throw SMITHLABException("study design doesn't match input files. "
+                            "Found these sample in input: " +\
+                            sampleNames_str + " and these samples in design "
+                            "matrix: " + designSamples_str);
+  }
+}
+
+/**
  * \brief If exonReadCount_fns contains only a single entry, we assume it is
  *        in matrix format (see details below), otherwise we assume the input
  *        files are in BED format.
@@ -67,19 +94,18 @@ run(istream &design_encoding, vector<string> &exonReadCount_fns,
   vector<string> sampleNames;
   if (exonReadCount_fns.size() == 1)
     readExons(exonReadCount_fns[0], genes, sampleNames, VERBOSE);
-  else {
-    readExons(exonReadCount_fns, genes, VERBOSE);
-    sampleNames.resize(exonReadCount_fns.size());
-    std::copy(exonReadCount_fns.begin(), exonReadCount_fns.end(),
-              sampleNames.begin());
-  }
-
+  else
+    readExons(exonReadCount_fns, genes, sampleNames, VERBOSE);
   
   // load the design matrix
   // TODO eliminate the need for the user to provide the 'base' factor
   Design full_design(design_encoding);
   vector<string> factor_names = full_design.factor_names();
   
+  // make sure the design matrix sample names match the names of the read
+  // count files.
+  checkDesign(full_design, sampleNames);
+
   vector<string>::const_iterator test_factor_it = 
       std::find(factor_names.begin(), factor_names.end(), test_factor_name);
   
@@ -171,13 +197,16 @@ getExonDifferenceString(const set<string> &exons1, const set<string> &exons2) {
  */
 void
 readExons(const vector<string> &filenames,
-          unordered_map< string, Gene > &genes, const bool VERBOSE) {
+          unordered_map< string, Gene > &genes,
+          vector<string> &sampleNames, const bool VERBOSE) {
   const string nameDelim = "_exon_";
   set<string> firstSampleExons;
   for (size_t i = 0; i < filenames.size(); ++i) {
     if (VERBOSE) cerr << "LOADING SAMPLE " << filenames[i] << " ... ";
     set<string> currentSampleExons;
-    const string sampleName(filenames[i]);
+    const string sampleName(strip_path(filenames[i]));
+    sampleNames.push_back(sampleName);
+
     vector<GenomicRegion> sampleExons;
     ReadBEDFile(filenames[i], sampleExons);
     if (VERBOSE) cerr << "DONE. LOADED " << sampleExons.size() << " "

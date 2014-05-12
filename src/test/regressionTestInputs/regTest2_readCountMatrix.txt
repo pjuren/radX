@@ -1,4 +1,4 @@
-/Users/puren/code/radX/src/test/regressionTestInputs/regTest1_C1.bed	/Users/puren/code/radX/src/test/regressionTestInputs/regTest1_C2.bed	/Users/puren/code/radX/src/test/regressionTestInputs/regTest1_M1.bed	/Users/puren/code/radX/src/test/regressionTestInputs/regTest1_M2.bed
+regTest1_C1.bed	regTest1_C2.bed	regTest1_M1.bed	regTest1_M2.bed
 chr1	11873	12227	DDX11L1_exon_0_0_chr1_11874_f	+	0	0	0	0
 chr1	12612	12721	DDX11L1_exon_1_0_chr1_12613_f	+	0	0	0	0
 chr1	13220	14409	DDX11L1_exon_2_0_chr1_13221_f	+	0	0	0	0

@@ -1,6 +1,6 @@
 base  KD
-Total_C1_NoIndex_L001_R1_finalSplit_exon_readCounts.bed 1 0
-Total_C2_NoIndex_L003_R1_finalSplit_exon_readCounts.bed 1 0
-Total_M1_NoIndex_L002_R1_finalSplit_exon_readCounts.bed 1 1
-Total_M2_NoIndex_L004_R1_finalSplit_exon_readCounts.bed 1 1
+regTest1_C1.bed 1 0
+regTest1_C2.bed 1 0
+regTest1_M1.bed 1 1
+regTest1_M2.bed 1 1
  
