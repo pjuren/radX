@@ -48,15 +48,31 @@ using std::istringstream;
 using std::tr1::unordered_map;
 using std::set;
 
+/**
+ * \brief If exonReadCount_fns contains only a single entry, we assume it is
+ *        in matrix format (see details below), otherwise we assume the input
+ *        files are in BED format.
+ *        TODO describe matrix format here too.
+ * \param design_encoding   TODO
+ * \param exonReadCount_fns TODO
+ * \param test_factor_name  TODO
+ * \param out               TODO
+ * \param VERBOSE           TODO
+ */
 void
-wand(istream &design_encoding, vector<string> &exonReadCount_fns,
+run(istream &design_encoding, vector<string> &exonReadCount_fns,
      string test_factor_name, ostream &out, const bool VERBOSE) {
-  // load the exon/gene counts
+  // load the exon/gene counts and sample names
   unordered_map<string, Gene > genes;
+  vector<string> sampleNames;
   if (exonReadCount_fns.size() == 1)
-    readExons(exonReadCount_fns[0], genes, VERBOSE);
-  else
+    readExons(exonReadCount_fns[0], genes, sampleNames, VERBOSE);
+  else {
     readExons(exonReadCount_fns, genes, VERBOSE);
+    sampleNames.resize(exonReadCount_fns.size());
+    std::copy(exonReadCount_fns.begin(), exonReadCount_fns.end(),
+              sampleNames.begin());
+  }
 
   
   // load the design matrix
@@ -83,17 +99,27 @@ wand(istream &design_encoding, vector<string> &exonReadCount_fns,
   for (unordered_map<string,Gene>::iterator gene_it = genes.begin();
        gene_it != genes.end(); gene_it++) {
     vector<size_t> geneReadCounts;
-    gene_it->second.getReadcounts(exonReadCount_fns, geneReadCounts);
+    gene_it->second.getReadcounts(sampleNames, geneReadCounts);
     cerr << "gene: " << gene_it->second.getName() << endl;
     for (Gene::const_iterator exon_it = gene_it->second.begin();
          exon_it != gene_it->second.end(); ++exon_it) {
-      vector<size_t> exonReadcounts;
-      exon_it->getReadcounts(exonReadCount_fns, exonReadcounts);
+      vector<size_t> exonReadCounts;
+      exon_it->getReadcounts(sampleNames, exonReadCounts);
 
-      full_regression.set_response(geneReadCounts, exonReadcounts);
+      cerr << "sampleNames: ";
+      for (size_t g = 0; g < sampleNames.size(); ++g) cerr << sampleNames[g] << ",";
+      cerr << endl;
+      cerr << "gene read-counts: ";
+      for (size_t g = 0; g < geneReadCounts.size(); ++g) cerr << geneReadCounts[g] << ",";
+      cerr << endl;
+      cerr << "exon read-counts: ";
+      for (size_t g = 0; g < exonReadCounts.size(); ++g) cerr << exonReadCounts[g] << ",";
+      cerr << endl;
+
+      full_regression.set_response(geneReadCounts, exonReadCounts);
       gsl_fitter(full_regression);
 
-      null_regression.set_response(geneReadCounts, exonReadcounts);
+      null_regression.set_response(geneReadCounts, exonReadCounts);
       gsl_fitter(null_regression);
 
       // TODO skip tests that will obviously result in p-value of 1
@@ -210,16 +236,19 @@ readExons(const vector<string> &filenames,
  *        exon in the file. Exons in a gene must not overlap each other. Each
  *        subsequent column i after the first five gives the read count for the
  *        exon in the ith sample (matching the order in the header row).
- * \param filenames filename to load the matrix from.
- * \param genes     results (Gene objects) will be placed into this map, where
- *                  the keys (string) are gene names.
- * \param VERBOSE   print extra status messages if this is true. Defaults to
- *                  false if not set.
+ * \param filenames    [in] filename to load the matrix from.
+ * \param genes        [out] results (Gene objects) will be placed into this
+ *                     map, where the keys (string) are gene names.
+ * \param sampleNames  [out] the sample names from the matrix will be placed
+ *                     into this vector. Anything that was in here before will
+ *                     be cleared first.
+ * \param VERBOSE      [in] print extra status messages if this is true.
+ *                     Defaults to false if not set.
  */
 void
 readExons(const string filename, unordered_map< string, Gene > &genes,
-          const bool VERBOSE) {
-  vector<string> sampleNames;
+          vector<string> &sampleNames, const bool VERBOSE) {
+  sampleNames.clear();
   bool first = true;
   ifstream file(filename.c_str());
   if (!file.good()) throw SMITHLABException("Unable to open file :" + filename);
@@ -235,8 +264,9 @@ readExons(const string filename, unordered_map< string, Gene > &genes,
     } else {
       assert(parts.size() == sampleNames.size() + 5);
       const string joined (parts[0] + "\t" + parts[1] + "\t" +\
-                           parts[2] + "\t" + parts[3] + "\t" + parts[4]);
-      cerr << joined << endl;
+                           parts[2] + "\t" + parts[3] + "\t" + "0" + "\t" +\
+                           parts[4]);
+      //cerr << joined << endl;
       GenomicRegion r(joined);
       const string fullExonName(r.get_name());
       const string geneName(getGeneName(fullExonName));

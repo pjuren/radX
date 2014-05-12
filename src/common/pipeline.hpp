@@ -35,7 +35,7 @@
 // of the factor with respect to which the differential methylation should be 
 // tested. All of the output is sent to the out output stream.
 
-void wand(std::istream &design_encoding,
+void run(std::istream &design_encoding,
           std::vector<std::string> &exonReadCount_fns,
           std::string test_factor_name, std::ostream &out,
           bool VERBOSE=false);
@@ -44,6 +44,7 @@ void readExons(const std::vector<std::string> &filenames,
           const bool VERBOSE = false);
 void readExons(const std::string filename,
                std::tr1::unordered_map< std::string, Gene > &genes,
+               std::vector<std::string> &sampleNames,
                const bool VERBOSE);
 
 #endif //PIPELINE_HPP_

@@ -28,7 +28,7 @@ PJU:  This file defines the regression tests to run. It's written in XML.
     <!--
       Tests the basic functionality of RADIX, nothing fancy here.
     -->
-    <name> RADIX regression test 1 </name> 
+    <name> RADIX regression test 1 -- basic functionality </name> 
     <command> 
       ../../bin/radx -v -d regressionTestInputs/regTest1_design.mat -f KD 
         regressionTestInputs/regTest1_C1.bed 
@@ -39,6 +39,23 @@ PJU:  This file defines the regression tests to run. It's written in XML.
     <expected> 
       regressionTestOutputs/regTest1_out.bed
     </expected> 
+  </test>
+  
+  <test>
+    <!--
+      Essentially the same test as regression test 1, but this time
+      we're providing the input in matrix format, instead of a set
+      of seperate BED files. We re-use the same design matrix as in 
+      regression test 1, and we expect the output to be identical
+    -->
+    <name> RADIX regression test 2 -- matrix input test </name>
+    <command>
+      ../../bin/radx -v -d regressionTestInputs/regTest1_design.mat -f KD
+        regressionTestInputs/regTest2_readCountMatrix.txt
+    </command>
+    <expected>
+      regressionTestOutputs/regTest1_out.bed
+    </expected>
   </test>
 </regressionTests>
 

@@ -82,7 +82,7 @@ try {
   if (!outfile.empty()) of.open(outfile.c_str());
   std::ostream out(outfile.empty() ? std::cout.rdbuf() : of.rdbuf());
   
-  wand(design_file, input_fns, test_factor_name, out, VERBOSE);
+  run(design_file, input_fns, test_factor_name, out, VERBOSE);
 }
 catch (const SMITHLABException &e) {
   cerr << e.what() << endl;
