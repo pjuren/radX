@@ -51,7 +51,7 @@ Gene::addExonSampleCount(GenomicRegion r, string sName, size_t count) {
       ss << "A given gene cannot have overlapping exons, since we define gene "
          << "read counts as the sum of exon read counts in that gene. Exon "
          << r << " was found tooverlap exon "
-         << this->exons[i].getGenomicRegion();
+         << this->exons[i];
       throw SMITHLABException(ss.str());
     }
   }
@@ -92,17 +92,17 @@ Gene::addExonSampleCount(GenomicRegion r, string sName, size_t count) {
  */
 void
 Gene::addExon(Exon &e) {
-  if (e.getChrom() != this->chrom) {
+  if (e.get_chrom() != this->chrom) {
     stringstream ss;
     ss << "trying to add exon to gene " << this->geneName << " on chromosome "
-       << e.getChrom() << ", but this gene already has exons on chrom "
+       << e.get_chrom() << ", but this gene already has exons on chrom "
        << this->chrom;
     throw SMITHLABException(ss.str());
   }
-  if (e.getChrom() != this->chrom) {
+  if (e.get_chrom() != this->chrom) {
     stringstream ss;
     ss << "trying to add exon to gene " << this->geneName << " on strand "
-       << e.getStrand() << ", but this gene already has exons on strand "
+       << e.get_strand() << ", but this gene already has exons on strand "
        << this->strand;
     throw SMITHLABException(ss.str());
   }

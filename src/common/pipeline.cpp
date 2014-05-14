@@ -76,6 +76,25 @@ checkDesign (const Design &d, const vector<string> &sampleNames) {
 }
 
 /**
+ * \brief TODO
+ * \param design_encoding     TODO
+ * \param geneReadCount_fn    TODO
+ * \param intronReadCount_fn  TODO
+ * \param test_factor_name    TODO
+ * \param out                 TODO
+ * \param pThresh             output only those exons with a p-value less than
+ *                            or equal to this value. Default is 0.01.
+ * \param VERBOSE             TODO
+ */
+void
+findDiffIncIntrons(istream &design_encoding, const string &geneReadCount_fn,
+                   const string &intronReadCount_fn,
+                   const string &test_factor_name,
+                   ostream &out, const double pThresh, const bool VERBOSE) {
+
+}
+
+/**
  * \brief If exonReadCount_fns contains only a single entry, we assume it is
  *        in matrix format (see details below), otherwise we assume the input
  *        files are in BED format.
@@ -146,14 +165,14 @@ run(istream &design_encoding, vector<string> &exonReadCount_fns,
                                      full_regression.maximum_likelihood());
       if (!std::isfinite(pval)) {
         std::cerr << "WARNING: log-likelihood ratio test failed for exon " 
-                  << exon_it->getGenomicRegion().get_name() 
+                  << exon_it->get_name()
                   << "; setting p-value to 1.0" << endl;
         pval = 1.0;
       }
 
       // TODO collect up all p-values and adjust for multiple hypothesis testing
       if (pval <= pThresh) {
-        GenomicRegion exonOut(exon_it->getGenomicRegion());
+        GenomicRegion exonOut(*exon_it);
         exonOut.set_score(full_regression.log_fold_change(test_factor));
         out << exonOut << "\t" << pval << endl;
       }
@@ -205,13 +224,12 @@ readExons(const vector<string> &filenames,
     const string sampleName(strip_path(filenames[i]));
     sampleNames.push_back(sampleName);
 
-    vector<GenomicRegion> sampleExons;
-    ReadBEDFile(filenames[i], sampleExons);
+    vector<Exon> sampleExons;
+    readBEDFile(filenames[i], sampleExons);
     if (VERBOSE) cerr << "DONE. LOADED " << sampleExons.size() << " "
                       << "EXONS" << endl;
     for (size_t j = 0; j < sampleExons.size(); ++j) {
-      const string fullExonName(sampleExons[j].get_name());
-      string geneName(getGeneName(fullExonName));
+      string geneName(sampleExons[j].getGeneName());
 
       // if we haven't seen this gene before, we make a new gene object for it
       unordered_map< string, Gene >::iterator loc = genes.find(geneName);
@@ -293,10 +311,11 @@ readExons(const string filename, unordered_map< string, Gene > &genes,
       const string joined (parts[0] + "\t" + parts[1] + "\t" +\
                            parts[2] + "\t" + parts[3] + "\t" + "0" + "\t" +\
                            parts[4]);
-      //cerr << joined << endl;
-      GenomicRegion r(joined);
+
+      // extra parens below disambiguate variable defn. from func. defn.
+      Exon r((GenomicRegion(joined)));
       const string fullExonName(r.get_name());
-      const string geneName(getGeneName(fullExonName));
+      const string geneName(r.getGeneName());
 
       // if we haven't seen this gene before, we make a new gene object for it
       unordered_map< string, Gene >::iterator loc = genes.find(geneName);

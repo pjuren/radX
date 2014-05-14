@@ -32,8 +32,8 @@
 
 class Gene {
 public:
-  Gene(Exon e) : geneName(getGeneName(e.getExonName())), chrom(e.getChrom()),
-                 strand(e.getStrand()) {};
+  Gene(Exon e) : geneName(e.getGeneName()), chrom(e.get_chrom()),
+                 strand(e.get_strand()) {};
   void addExon(Exon &e);
   void addExonSampleCount(GenomicRegion r, std::string sName, size_t count);
   void getReadcounts(const std::vector<std::string> &sampleNames,

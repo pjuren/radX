@@ -1,7 +1,5 @@
 /*    Copyright (C) 2014 University of Southern California and
- *                       Philip J Uren
- *                       Egor Dolzhenko
- *                       Andrew D Smith
+ *                       Philip J Uren, Egor Dolzhenko, Andrew D Smith
  *
  *    Authors: Philip J Uren, Andrew D. Smith and Egor Dolzhenko
  *
@@ -22,35 +20,37 @@
 // smithlab common code includes
 #include "GenomicRegion.hpp"
 
+// RADIX includes
+#include "AugmentedGenomicRegion.hpp"
+
 // stl includes
 #include <vector>
 #include <string>
 #include <tr1/unordered_map>
 
-size_t countOccurrences(const std::string &needle, const std::string &haystack,
-                        const bool overlapping=false);
+// forward declare this
+class Exon;
+
+// helper functions
 std::pair<std::string, std::string> splitFullExonName(const std::string &name);
-std::string getGeneName(const std::string &exonName);
+void readBEDFile (const std::string &fn, std::vector<Exon> &res);
 
-class Exon {
-public:
-  Exon(const GenomicRegion& r) : region(r) {};
-  bool partialOverlap(const GenomicRegion &r) const;
-  bool sameRegion(const GenomicRegion &r) const;
-  void addSampleReadCount(const std::string &sampleName, const size_t count);
-  void getReadcounts(const std::vector<std::string> &sampleNames,
-                     std::vector<size_t> &res) const;
-  GenomicRegion getGenomicRegion() const;
-  std::string getExonName() const;
-  std::string getChrom() const;
-  char getStrand() const;
-
+/**
+ * \brief An Exon is just an AugmentedGenomicRegion with some additional
+ *        constraints on naming, and functionality for manipulating the name
+ */
+class Exon : public AugmentedGenomicRegion {
+public :
+  Exon(const GenomicRegion r) : AugmentedGenomicRegion(r) {
+    std::pair<std::string, std::string> spltNm(splitFullExonName(r.get_name()));
+    this->geneName = spltNm.first;
+    this->exonName = spltNm.second;
+  }
+  std::string getExonName() const { return this->exonName; }
+  std::string getGeneName() const { return this->geneName; }
 private :
-  GenomicRegion region;
-  std::tr1::unordered_map<std::string, size_t> sampleCounts;
-
-  Exon() {};
-  void addSample(std::string sampleName, size_t count);
+  std::string geneName;
+  std::string exonName;
 };
 
 #endif // EXON_HPP_

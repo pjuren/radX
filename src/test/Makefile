@@ -146,7 +146,8 @@ LIBS=-lgsl -lgslcblas -lm -lpthread
 $(TESTS): $(addprefix $(SMITHLAB_CPP)/, GenomicRegion.o smithlab_os.o \
           smithlab_utils.o OptionParser.o MappedRead.o) \
           design.o table_row.o pipeline.o regression.o loglikratio_test.o \
-          gsl_fitter.o Exon.o Gene.o gtest_main.a
+          gsl_fitter.o Exon.o Gene.o AugmentedGenomicRegion.o utils.o \
+          gtest_main.a
 
 TestMatrix : TestMatrix.o gtest_main.a $(USER_DIR)/Matrix.o \
              $(SMITHLAB_CPP)/smithlab_utils.o 
