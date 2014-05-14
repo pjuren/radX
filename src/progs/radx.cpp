@@ -43,6 +43,7 @@ main(int argc, const char **argv) {
 try {
   string outfile, design_filename;
   string test_factor_name;
+  double pThreshold = 0.01;
   bool VERBOSE = false;
   
   /****************** COMMAND LINE OPTIONS ********************/
@@ -52,8 +53,10 @@ try {
                     false, outfile);
   opt_parse.add_opt("verbose", 'v', "print more run info", false, VERBOSE);
   opt_parse.add_opt("design", 'd', "experiment design", true, design_filename);
-  opt_parse.add_opt("factor", 'f', "a factor to test",
-                    true, test_factor_name);
+  opt_parse.add_opt("factor", 'f', "a factor to test", true, test_factor_name);
+  opt_parse.add_opt("pThresh", 'p', "output exons with p-value less than or "
+                                    "equal to this. Default is 0.01",
+                    false, pThreshold);
   vector<string> leftover_args;
   opt_parse.parse(argc, argv, leftover_args);
   if (argc == 1 || opt_parse.help_requested()) {
@@ -82,7 +85,7 @@ try {
   if (!outfile.empty()) of.open(outfile.c_str());
   std::ostream out(outfile.empty() ? std::cout.rdbuf() : of.rdbuf());
   
-  run(design_file, input_fns, test_factor_name, out, VERBOSE);
+  run(design_file, input_fns, test_factor_name, out, pThreshold, VERBOSE);
 }
 catch (const SMITHLABException &e) {
   cerr << e.what() << endl;

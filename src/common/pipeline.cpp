@@ -84,11 +84,14 @@ checkDesign (const Design &d, const vector<string> &sampleNames) {
  * \param exonReadCount_fns TODO
  * \param test_factor_name  TODO
  * \param out               TODO
+ * \param pThresh           output only those exons with a p-value less than
+ *                          or equal to this value. Default is 0.01.
  * \param VERBOSE           TODO
  */
 void
 run(istream &design_encoding, vector<string> &exonReadCount_fns,
-     string test_factor_name, ostream &out, const bool VERBOSE) {
+     string test_factor_name, ostream &out, const double pThresh,
+     const bool VERBOSE) {
   // load the exon/gene counts and sample names
   unordered_map<string, Gene > genes;
   vector<string> sampleNames;
@@ -142,9 +145,8 @@ run(istream &design_encoding, vector<string> &exonReadCount_fns,
       double pval = loglikratio_test(null_regression.maximum_likelihood(),
                                      full_regression.maximum_likelihood());
 
-      // TODO add user-selected significance threshold
       // TODO collect up all p-values and adjust for multiple hypothesis testing
-      if (pval < 0.01) {
+      if (pval <= pThresh) {
         GenomicRegion exonOut(exon_it->getGenomicRegion());
         exonOut.set_score(full_regression.log_fold_change(test_factor));
         out << exonOut << "\t" << pval << endl;
