@@ -141,9 +141,15 @@ run(istream &design_encoding, vector<string> &exonReadCount_fns,
       null_regression.set_response(geneReadCounts, exonReadCounts);
       gsl_fitter(null_regression);
 
-      // TODO skip tests that will obviously result in p-value of 1
+      // TODO skip tests that will obviously result in p-value of 1?
       double pval = loglikratio_test(null_regression.maximum_likelihood(),
                                      full_regression.maximum_likelihood());
+      if (!std::isfinite(pval)) {
+        std::cerr << "WARNING: log-likelihood ratio test failed for exon " 
+                  << exon_it->getGenomicRegion().get_name() 
+                  << "; setting p-value to 1.0" << endl;
+        pval = 1.0;
+      }
 
       // TODO collect up all p-values and adjust for multiple hypothesis testing
       if (pval <= pThresh) {
