@@ -44,12 +44,19 @@ public:
 
   /*----------------------------- MUTATORS ----------------------------------*/
   void addSampleReadCount(const std::string &sampleName, const size_t count);
+
+  /*----------------------- STATIC MEMBERS FOR IO ---------------------------*/
+  static void readFromBEDFiles(const std::vector<std::string> &fns,
+                               std::vector<AugmentedGenomicRegion> &res,
+                               std::vector<std::string> &sampleNames,
+                               const bool VERBOSE=false);
+  static void readFromMatrixFile(const std::string &fn,
+                                 std::vector<AugmentedGenomicRegion> &res,
+                                 std::vector<std::string> &sampleNames,
+                                 const bool VERBOSE=false);
 private :
   /** map of read counts indexed by sample name for this region **/
   std::tr1::unordered_map<std::string, size_t> sampleCounts;
-
-  /*-------------------------- PRIVATE MUTATORS -----------------------------*/
-  void addSample(std::string sampleName, size_t count);
 };
 
 #endif // AUG_GEN_REG_HPP_
