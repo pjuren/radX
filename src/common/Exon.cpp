@@ -81,3 +81,26 @@ readBEDFile (const string &fn, vector<Exon> &res) {
   }
 }
 
+/******************************************************************************
+ *                          EXON CLASS DEFINITION
+ ******************************************************************************/
+
+/**
+ * \brief TODO
+ */
+Exon::Exon(const GenomicRegion& r) : AugmentedGenomicRegion(r) {
+  std::pair<std::string, std::string> spltNm(splitFullExonName(r.get_name()));
+  this->geneName = spltNm.first;
+  this->exonName = spltNm.second;
+}
+
+/**
+ * \brief TODO
+ */
+Exon::Exon(const AugmentedGenomicRegion& r) : AugmentedGenomicRegion(r) {
+  std::pair<std::string, std::string> spltNm(splitFullExonName(r.get_name()));
+  this->geneName = spltNm.first;
+  this->exonName = spltNm.second;
+}
+
+

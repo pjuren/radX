@@ -41,6 +41,8 @@ public:
   bool sameRegion(const GenomicRegion &r) const;
   void getReadcounts(const std::vector<std::string> &sampleNames,
                      std::vector<size_t> &res) const;
+  void getSampleNames(std::vector<std::string> &names) const;
+  size_t getSampleCount() const;
 
   /*----------------------------- MUTATORS ----------------------------------*/
   void addSampleReadCount(const std::string &sampleName, const size_t count);

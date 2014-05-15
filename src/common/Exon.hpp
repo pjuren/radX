@@ -41,11 +41,11 @@ void readBEDFile (const std::string &fn, std::vector<Exon> &res);
  */
 class Exon : public AugmentedGenomicRegion {
 public :
-  Exon(const GenomicRegion r) : AugmentedGenomicRegion(r) {
-    std::pair<std::string, std::string> spltNm(splitFullExonName(r.get_name()));
-    this->geneName = spltNm.first;
-    this->exonName = spltNm.second;
-  }
+  // CONSTRUCTORS
+  Exon(const GenomicRegion& r);
+  Exon(const AugmentedGenomicRegion& r);
+
+  // INSPECTORS
   std::string getExonName() const { return this->exonName; }
   std::string getGeneName() const { return this->geneName; }
 private :

@@ -106,12 +106,44 @@ AugmentedGenomicRegion::getReadcounts(const vector<string> &sNames,
   res.clear();
   for (size_t i = 0; i < sNames.size(); ++i) {
     if (this->sampleCounts.find(sNames[i]) == this->sampleCounts.end()) {
-      throw SMITHLABException("Lookup of read count for " + sNames[i] +\
-                              " for region " + this->get_name() + " failed. "
-                              "No read-count for that sample");
+      stringstream ss;
+      ss << "Lookup of read count for " << sNames[i] << " for region "
+         << this->get_name() << " failed. " << "No read-count for that sample. "
+         << "This region contains read counts for the following samples: ";
+      vector<string> knownSamples;
+      this->getSampleNames(knownSamples);
+      if (knownSamples.size() == 0) ss << "<NONE>";
+      for (size_t j = 0; j < knownSamples.size(); ++j) {
+        if (j != 0) ss << ", ";
+        ss << knownSamples[j];
+      }
+      throw SMITHLABException(ss.str());
     }
     res.push_back(this->sampleCounts.find(sNames[i])->second);
   }
+}
+
+/**
+ * \brief get a vector of the sample names that this region has counts for.
+ * \param names the results will be added to this vector. Note that anything
+ *              already in here is cleared.
+ */
+void
+AugmentedGenomicRegion::getSampleNames(vector<string> &names) const {
+  names.clear();
+  typedef unordered_map<string, size_t>::const_iterator mapItType;
+  for (mapItType it = this->sampleCounts.begin();
+       it != this->sampleCounts.end(); ++it) {
+    names.push_back(it->first);
+  }
+}
+
+/**
+ * \brief TODO
+ */
+size_t
+AugmentedGenomicRegion::getSampleCount() const {
+  return this->sampleCounts.size();
 }
 
 

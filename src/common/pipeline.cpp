@@ -221,7 +221,7 @@ readExons(const vector<string> &filenames,
   for (size_t i = 0; i < filenames.size(); ++i) {
     if (VERBOSE) cerr << "LOADING SAMPLE " << filenames[i] << " ... ";
     set<string> currentSampleExons;
-    const string sampleName(strip_path(filenames[i]));
+    const string sampleName(strip_path_and_suffix(filenames[i]));
     sampleNames.push_back(sampleName);
 
     vector<Exon> sampleExons;
@@ -293,48 +293,23 @@ readExons(const vector<string> &filenames,
 void
 readExons(const string filename, unordered_map< string, Gene > &genes,
           vector<string> &sampleNames, const bool VERBOSE) {
-  sampleNames.clear();
-  bool first = true;
-  ifstream file(filename.c_str());
-  if (!file.good()) throw SMITHLABException("Unable to open file :" + filename);
-  string line;
-  while (!file.eof()) {
-    getline(file, line);
-    line = smithlab::strip(line);
-    if (line.empty()) continue;
-    vector<string> parts(smithlab::split(line,"\t"));
-    if (first) {
-      first = false;
-      std::swap(parts, sampleNames);
-    } else {
-      assert(parts.size() == sampleNames.size() + 5);
-      const string joined (parts[0] + "\t" + parts[1] + "\t" +\
-                           parts[2] + "\t" + parts[3] + "\t" + "0" + "\t" +\
-                           parts[4]);
+  // note that the below two lines also populate the sampleNames vector
+  vector<AugmentedGenomicRegion> regions;
+  AugmentedGenomicRegion::readFromMatrixFile(filename, regions,
+                                             sampleNames, VERBOSE);
 
-      // extra parens below disambiguate variable defn. from func. defn.
-      Exon r((GenomicRegion(joined)));
-      const string fullExonName(r.get_name());
-      const string geneName(r.getGeneName());
-
-      // if we haven't seen this gene before, we make a new gene object for it
-      unordered_map< string, Gene >::iterator loc = genes.find(geneName);
-      if (loc == genes.end()) {
-        Exon e(r);
-        genes.insert (make_pair<string, Gene>(geneName, Gene(e)));
-        loc = genes.find(geneName);
-      }
-      for (size_t i = 0; i < sampleNames.size(); ++i) {
-        int sampleCount(atoi(parts[i+5].c_str()));
-        if (sampleCount < 0) {
-          stringstream ss;
-          ss << "line: " << line << " contains an invalid sample count: "
-             << sampleCount;
-          throw SMITHLABException(ss.str());
-        }
-        loc->second.addExonSampleCount(r, sampleNames[i],
-                                       static_cast<size_t>(sampleCount));
-      }
+  for (size_t i = 0; i < regions.size(); ++i) {
+    Exon e(regions[i]);
+    // if we haven't seen this gene before, we make a new gene object for it
+    unordered_map< string, Gene >::iterator loc = genes.find(e.getGeneName());
+    if (loc == genes.end()) {
+      genes.insert (make_pair<string, Gene>(e.getGeneName(), Gene(e)));
+      loc = genes.find(e.getGeneName());
     }
+    vector<size_t> readCounts;
+    e.getReadcounts(sampleNames, readCounts);
+    assert(readCounts.size() == sampleNames.size());
+    for (size_t j = 0; j < readCounts.size(); j++)
+      loc->second.addExonSampleCount(e, sampleNames[j], readCounts[j]);
   }
 }
