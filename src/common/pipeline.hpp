@@ -39,11 +39,11 @@ void run(std::istream &design_encoding,
           std::vector<std::string> &exonReadCount_fns,
           std::string test_factor_name, std::ostream &out,
           const double pThresh = 0.01, bool VERBOSE=false);
-void readExons(const std::vector<std::string> &filenames,
+/*void readExons(const std::vector<std::string> &filenames,
           std::tr1::unordered_map< std::string, Gene > &genes,
           std::vector<std::string> &sampleNames,
-          const bool VERBOSE = false);
-void readExons(const std::string filename,
+          const bool VERBOSE = false);*/
+void readExons(const std::vector<std::string> filenames,
                std::tr1::unordered_map< std::string, Gene > &genes,
                std::vector<std::string> &sampleNames,
                const bool VERBOSE);

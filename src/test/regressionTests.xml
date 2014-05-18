@@ -64,7 +64,7 @@ PJU:  This file defines the regression tests to run. It's written in XML.
       a threshold of 1.0 on the p-values, so we expect to get all
       500 of our exons back in the output.
     -->
-    <name> RADIX regression test 2 -- score everything test </name>
+    <name> RADIX regression test 3 -- score everything test </name>
     <command>
       ../../bin/radx -p 1.0 -v -d regressionTestInputs/regTest1_design.mat -f KD 
         regressionTestInputs/regTest1_C1.bed 
