@@ -148,7 +148,7 @@ run(istream &design_encoding, vector<string> &exonReadCount_fns,
        gene_it != genes.end(); gene_it++) {
     vector<size_t> geneReadCounts;
     gene_it->second.getReadcounts(sampleNames, geneReadCounts);
-    cerr << "gene: " << gene_it->second.getName() << endl;
+    //cerr << "gene: " << gene_it->second.getName() << endl;
     for (Gene::const_iterator exon_it = gene_it->second.begin();
          exon_it != gene_it->second.end(); ++exon_it) {
       vector<size_t> exonReadCounts;
