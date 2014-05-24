@@ -114,10 +114,7 @@ run(istream &design_encoding, vector<string> &exonReadCount_fns,
   // load the exon/gene counts and sample names
   unordered_map<string, Gene > genes;
   vector<string> sampleNames;
-  if (exonReadCount_fns.size() == 1)
-    readExons(exonReadCount_fns[0], genes, sampleNames, VERBOSE);
-  else
-    readExons(exonReadCount_fns, genes, sampleNames, VERBOSE);
+  readExons(exonReadCount_fns, genes, sampleNames, VERBOSE);
   
   // load the design matrix
   // TODO eliminate the need for the user to provide the 'base' factor
@@ -144,6 +141,7 @@ run(istream &design_encoding, vector<string> &exonReadCount_fns,
   null_design.remove_factor(test_factor);
   Regression null_regression(null_design);
   
+  vector< std::pair<GenomicRegion, double> > results;
   for (unordered_map<string,Gene>::iterator gene_it = genes.begin();
        gene_it != genes.end(); gene_it++) {
     vector<size_t> geneReadCounts;
@@ -170,13 +168,17 @@ run(istream &design_encoding, vector<string> &exonReadCount_fns,
         pval = 1.0;
       }
 
-      // TODO collect up all p-values and adjust for multiple hypothesis testing
-      if (pval <= pThresh) {
-        GenomicRegion exonOut(*exon_it);
-        exonOut.set_score(full_regression.log_fold_change(test_factor));
-        out << exonOut << "\t" << pval << endl;
-      }
+      GenomicRegion exonOut(*exon_it);
+      exonOut.set_score(full_regression.log_fold_change(test_factor));
+      results.push_back(std::make_pair<GenomicRegion, double>(exonOut, pval));
     }
+  }
+
+  std::sort(results.begin(), results.end());
+  // TODO adjust p-values for multiple hypothesis testing
+  for (size_t i = 0; i < results.size(); ++i) {
+    if (results[i].second <= pThresh)
+      out << results[i].first << "\t" << results[i].second << endl;
   }
 }
 
@@ -195,78 +197,6 @@ getExonDifferenceString(const set<string> &exons1, const set<string> &exons2) {
     dStr = dStr + (*it);
   }
   return dStr;
-}
-
-/**
- * \brief Load exon and gene read counts from a set of files. Each file
- *        represents a sample, and must be in BED format. Each entry in a file
- *        gives the genomic region associated with an exon, and must be named
- *        exonName_exon_geneName, where exonName and geneName can be any
- *        strings as long as they (1) don't contain the tab character and (2)
- *        uniquely identify the exon in the file. Exons in a gene must not
- *        overlap each other. The score field must give the number of reads
- *        mapping to that exon in the given sample.
- * \param filenames filenames to load sample data from
- * \param genes     results (Gene objects) will be placed into this map, where
- *                  the keys (string) are gene names.
- * \param VERBOSE   print extra status messages if this is true. Defaults to
- *                  false if not set.
- */
-void
-readExons(const vector<string> &filenames,
-          unordered_map< string, Gene > &genes,
-          vector<string> &sampleNames, const bool VERBOSE) {
-  const string nameDelim = "_exon_";
-  set<string> firstSampleExons;
-  for (size_t i = 0; i < filenames.size(); ++i) {
-    if (VERBOSE) cerr << "LOADING SAMPLE " << filenames[i] << " ... ";
-    set<string> currentSampleExons;
-    const string sampleName(strip_path_and_suffix(filenames[i]));
-    sampleNames.push_back(sampleName);
-
-    vector<Exon> sampleExons;
-    readBEDFile(filenames[i], sampleExons);
-    if (VERBOSE) cerr << "DONE. LOADED " << sampleExons.size() << " "
-                      << "EXONS" << endl;
-    for (size_t j = 0; j < sampleExons.size(); ++j) {
-      string geneName(sampleExons[j].getGeneName());
-
-      // if we haven't seen this gene before, we make a new gene object for it
-      unordered_map< string, Gene >::iterator loc = genes.find(geneName);
-      if (loc == genes.end()) {
-        Exon e(sampleExons[j]);
-        genes.insert (make_pair<string, Gene>(geneName, Gene(e)));
-        loc = genes.find(geneName);
-      }
-      loc->second.addExonSampleCount(sampleExons[j], sampleName,
-                                     sampleExons[j].get_score());
-
-      // we remember a kind of manual hash of all the exons we see
-      stringstream ss;
-      ss << sampleExons[j].get_chrom() << sampleExons[j].get_start()
-         << sampleExons[j].get_end() << sampleExons[j].get_name()
-         << sampleExons[j].get_strand();
-      currentSampleExons.insert(ss.str());
-    }
-
-    // finished loading all of the exons for this sample. If this is the first
-    // sample, just remember what the exon keys were. Otherwise, we're going
-    // check that the keys from this sample matched the ones we already saw in
-    // the first sample.
-    if (i == 0) std::swap(firstSampleExons, currentSampleExons);
-    else {
-      string m = getExonDifferenceString(firstSampleExons, currentSampleExons);
-      string a = getExonDifferenceString(currentSampleExons, firstSampleExons);
-      if (!m.empty())
-        throw SMITHLABException("The following exons were present in " +\
-                                filenames[0] + "but absent in " +\
-                                filenames[i] + ": " + m);
-      if (!a.empty())
-        throw SMITHLABException("The following exons were present in " +\
-                                filenames[i] + "but absent in " +\
-                                filenames[0] + ": " + a);
-    }
-  }
 }
 
 /**
@@ -291,11 +221,15 @@ readExons(const vector<string> &filenames,
  *                     Defaults to false if not set.
  */
 void
-readExons(const string filename, unordered_map< string, Gene > &genes,
+readExons(const vector<string> filenames, unordered_map< string, Gene > &genes,
           vector<string> &sampleNames, const bool VERBOSE) {
   // note that the below two lines also populate the sampleNames vector
   vector<AugmentedGenomicRegion> regions;
-  AugmentedGenomicRegion::readFromMatrixFile(filename, regions,
+  if (filenames.size() == 1)
+    AugmentedGenomicRegion::readFromMatrixFile(filenames[0], regions,
+                                               sampleNames, VERBOSE);
+  else
+    AugmentedGenomicRegion::readFromBEDFiles(filenames, regions,
                                              sampleNames, VERBOSE);
 
   for (size_t i = 0; i < regions.size(); ++i) {
