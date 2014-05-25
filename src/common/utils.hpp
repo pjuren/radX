@@ -20,8 +20,19 @@
 #define UTIL_HPP_
 
 #include <string>
+#include <sstream>
 
 size_t countOccurrences(const std::string &needle, const std::string &haystack,
                         const bool overlapping=false);
+
+template<typename T>
+std::string join(const T &cntnr, const std::string &delim = ", ") {
+  std::stringstream ss;
+  for (typename T::const_iterator it = cntnr.begin(); it != cntnr.end(); ++it) {
+    if (it != cntnr.begin()) ss << delim;
+    ss << (*it);
+  }
+  return ss.str();
+}
 
 #endif

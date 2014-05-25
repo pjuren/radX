@@ -76,9 +76,11 @@ checkDesign (const Design &d, const vector<string> &sampleNames) {
 }
 
 /**
- * \brief TODO
+ * \brief Find introns that change their inclusion ratio between conditions.
+ *        This is the ratio of the (normalized) number of reads in the intron
+ *        to the number of reads in the gene (any part; intron or exon).
  * \param design_encoding     TODO
- * \param geneReadCount_fn    TODO
+ * \param exonReadCount_fns   TODO
  * \param intronReadCount_fn  TODO
  * \param test_factor_name    TODO
  * \param out                 TODO
@@ -87,10 +89,12 @@ checkDesign (const Design &d, const vector<string> &sampleNames) {
  * \param VERBOSE             TODO
  */
 void
-findDiffIncIntrons(istream &design_encoding, const string &geneReadCount_fn,
-                   const string &intronReadCount_fn,
-                   const string &test_factor_name,
-                   ostream &out, const double pThresh, const bool VERBOSE) {
+findDiffIncIntrons(istream &design_encoding, const string &intronReadCount_fn,
+                   const string &exonReadCount_fns,
+                   const string &test_factor_name, ostream &out,
+                   const double pThresh, const bool VERBOSE) {
+
+
 
 }
 
@@ -114,7 +118,7 @@ run(istream &design_encoding, vector<string> &exonReadCount_fns,
   // load the exon/gene counts and sample names
   unordered_map<string, Gene > genes;
   vector<string> sampleNames;
-  readExons(exonReadCount_fns, genes, sampleNames, VERBOSE);
+  readGenesExonsOnly(exonReadCount_fns, genes, sampleNames, VERBOSE);
   
   // load the design matrix
   // TODO eliminate the need for the user to provide the 'base' factor
@@ -199,51 +203,4 @@ getExonDifferenceString(const set<string> &exons1, const set<string> &exons2) {
   return dStr;
 }
 
-/**
- * \brief Load exon and gene read counts from a single read-count matrix file.
- *        The file is tab separated. The first row is a header and lists the
- *        sample names for each sample included in the file. Each subsequent
- *        row represents an exon. The first five columns in an exon row are:
- *        chromosome, start index, end index, exon name, and exon exon strand.
- *        The exon name must follow the format: exonName_exon_geneName,
- *        where exonName and geneName can be any strings as long as they
- *        (1) don't contain the tab character and (2) uniquely identify the
- *        exon in the file. Exons in a gene must not overlap each other. Each
- *        subsequent column i after the first five gives the read count for the
- *        exon in the ith sample (matching the order in the header row).
- * \param filenames    [in] filename to load the matrix from.
- * \param genes        [out] results (Gene objects) will be placed into this
- *                     map, where the keys (string) are gene names.
- * \param sampleNames  [out] the sample names from the matrix will be placed
- *                     into this vector. Anything that was in here before will
- *                     be cleared first.
- * \param VERBOSE      [in] print extra status messages if this is true.
- *                     Defaults to false if not set.
- */
-void
-readExons(const vector<string> filenames, unordered_map< string, Gene > &genes,
-          vector<string> &sampleNames, const bool VERBOSE) {
-  // note that the below two lines also populate the sampleNames vector
-  vector<AugmentedGenomicRegion> regions;
-  if (filenames.size() == 1)
-    AugmentedGenomicRegion::readFromMatrixFile(filenames[0], regions,
-                                               sampleNames, VERBOSE);
-  else
-    AugmentedGenomicRegion::readFromBEDFiles(filenames, regions,
-                                             sampleNames, VERBOSE);
 
-  for (size_t i = 0; i < regions.size(); ++i) {
-    Exon e(regions[i]);
-    // if we haven't seen this gene before, we make a new gene object for it
-    unordered_map< string, Gene >::iterator loc = genes.find(e.getGeneName());
-    if (loc == genes.end()) {
-      genes.insert (make_pair<string, Gene>(e.getGeneName(), Gene(e)));
-      loc = genes.find(e.getGeneName());
-    }
-    vector<size_t> readCounts;
-    e.getReadcounts(sampleNames, readCounts);
-    assert(readCounts.size() == sampleNames.size());
-    for (size_t j = 0; j < readCounts.size(); j++)
-      loc->second.addExonSampleCount(e, sampleNames[j], readCounts[j]);
-  }
-}

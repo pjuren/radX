@@ -26,11 +26,11 @@ PROGS = radx
 CXX = g++
 CFLAGS = -Wall -fPIC -fmessage-length=50
 OPTFLAGS = -O3
-DEBUGFLAGS = -g 
+DEBUGFLAGS = -g
 COMMON_DIR = ../common/
-LIBS = -lgsl -lgslcblas 
+LIBS = -lgsl -lgslcblas
 
-INCLUDEDIRS = $(SMITHLAB_CPP) $(COMMON_DIR) 
+INCLUDEDIRS = $(SMITHLAB_CPP) $(COMMON_DIR)
 INCLUDEARGS = $(addprefix -I,$(INCLUDEDIRS))
 
 ifeq "$(shell uname)" "Darwin"
@@ -53,9 +53,9 @@ all:    $(PROGS)
 
 %.o: %.cpp %.hpp
 	$(CXX) $(CFLAGS) -c -o $@ $< $(INCLUDEARGS)
-	
+
 %.o: %.cpp %.h
-	$(CXX) $(CFLAGS) -c -o $@ $< $(INCLUDEARGS)	
+	$(CXX) $(CFLAGS) -c -o $@ $< $(INCLUDEARGS)
 
 %: %.cpp
 	$(CXX) $(CFLAGS) -o $@ $^ $(INCLUDEARGS) $(LIBS)
@@ -64,7 +64,7 @@ radx: $(addprefix $(SMITHLAB_CPP)/, GenomicRegion.o smithlab_os.o \
 	smithlab_utils.o OptionParser.o)
 radx :$(addprefix $(COMMON_DIR), \
 	design.o regression.o loglikratio_test.o table_row.o pipeline.o \
-  gsl_fitter.o Gene.o Exon.o AugmentedGenomicRegion.o utils.o)
+  gsl_fitter.o Gene.o Exon.o Intron.o AugmentedGenomicRegion.o utils.o)
 
 install: all
 	@mkdir -p ../../bin
@@ -77,7 +77,6 @@ clean:
 distclean : clean
 	@rm Makefile
 .PHONY : distclean
-	
+
 test:
 	make -C ../test SMITHLAB_CPP=$(SMITHLAB_CPP) test; \
-
